@@ -50,7 +50,8 @@ Step 4: Start Jenkins and Unlock
 Step 1: Enable 2-Step Verification on Gmail
 
 	Go to your Gmail account.
- ![image](https://github.com/user-attachments/assets/76c74909-37fe-4489-8226-f697707bae00)
+ ![image](https://github.com/user-attachments/assets/57f4e7d3-2ebb-40a8-a0d9-5b3fe1daf2c0)
+
 
 	Navigate to Manage Your Google Account.
 	Click on Security.
