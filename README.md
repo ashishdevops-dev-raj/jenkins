@@ -54,14 +54,27 @@ Step 1: Enable 2-Step Verification on Gmail
 
 	Navigate to Manage Your Google Account.
 	Click on Security.
+ ![image](https://github.com/user-attachments/assets/e03f6b3f-e40b-458b-a88e-8186675bf2e0)
+
 	Ensure 2-Step Verification is turned ON.
+
+ ![image](https://github.com/user-attachments/assets/ea912cc2-adf6-436f-819b-f7fa11c85717)
+
+ 
 
 Step 2: Generate an App Password
 
 	In the Security section, search for App Passwords.
+ ![image](https://github.com/user-attachments/assets/6712939d-0ee5-4105-80a0-524463ef14d8)
+
 	Select App Passwords.
 	Choose an app name (e.g., "Jenkins") and click Create.
+ ![image](https://github.com/user-attachments/assets/4a793993-00c2-4701-8509-b0f4eeaefd76)
+
 	Copy the generated password. You will use this later in Jenkins.
+
+ ![image](https://github.com/user-attachments/assets/598929a5-235e-4d0b-b9c1-c4e01a810675)
+
 
  Step 3: Add Credentials in Jenkins
  
