@@ -48,18 +48,21 @@ Step 4: Start Jenkins and Unlock
 
 
 Step 1: Enable 2-Step Verification on Gmail
+
 	Go to your Gmail account.
 	Navigate to Manage Your Google Account.
 	Click on Security.
 	Ensure 2-Step Verification is turned ON.
 
 Step 2: Generate an App Password
+
 	In the Security section, search for App Passwords.
 	Select App Passwords.
 	Choose an app name (e.g., "Jenkins") and click Create.
 	Copy the generated password. You will use this later in Jenkins.
 
  Step 3: Add Credentials in Jenkins
+ 
 	Open Jenkins.
 	Go to Manage Jenkins > Credentials.
 	Under Global credentials, click Add Credentials.
@@ -70,6 +73,7 @@ Step 2: Generate an App Password
 	Save the credentials.
  
 Step 4: Configure Email Settings in Jenkins
+
 	Go to Manage Jenkins > Configure System.
 	Scroll to Extended E-mail Notification.
 	Set the following:
@@ -80,6 +84,7 @@ Step 4: Configure Email Settings in Jenkins
 		Select the credentials you added earlier (your Gmail and App Password)
 
 Step 5: Save and Test Configuration
+
 	Save the configuration.
 	Test sending a test email to verify the setup is working.
 	Email Extension Plugin
