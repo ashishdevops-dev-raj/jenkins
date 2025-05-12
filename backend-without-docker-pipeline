@@ -1,0 +1,67 @@
+pipeline {
+    agent any
+tools {
+        maven 'Maven 3.8.6'
+        jdk 'jdk17'
+    }
+environment {
+
+        JAVA_HOME = tool name: 'jdk17', type: 'jdk'
+        PATH = "${JAVA_HOME}/bin:${PATH}"
+        JAR_NAME = 'app.jar'
+    }
+stages {
+stage('Verify JDK') {
+            steps {
+                sh 'java -version'
+            }
+        }
+
+        stage('Checkout Code') {
+            steps {
+                git credentialsId: 'ashish-key-git', url: 'https://github.com/data-on-disk/dod-swim-backend.git', branch: 'develop'
+            }
+        }
+
+        stage('Build Application') {
+            steps {
+                sh 'mvn clean package -DskipTests'
+            }
+        }
+
+        stage('Copy JAR to Azure VM') {
+            environment {
+                REMOTE_USER = 'azureuser'
+                REMOTE_HOST = '40.76.227.38'
+                REMOTE_DIR = '/opt/app'
+            }
+
+            steps {
+                sshagent (credentials: ['vm-key']) {
+                    sh '''
+                        echo "Copying JAR to Azure VM..."
+                        scp -o StrictHostKeyChecking=no target/*.jar $REMOTE_USER@$REMOTE_HOST:/home/$REMOTE_USER/$JAR_NAME
+
+                        echo "Moving JAR to deployment directory..."
+                        ssh -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST "sudo mv /home/$REMOTE_USER/$JAR_NAME $REMOTE_DIR/$JAR_NAME"
+
+                        echo "Restarting Spring Boot service..."
+                        ssh -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST "sudo systemctl restart springboot-backend"
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline finished.'
+        }
+        success {
+            echo 'Deployment successful!'
+        }
+        failure {
+            echo 'Pipeline failed.'
+        }
+    }
+}
