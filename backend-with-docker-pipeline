@@ -1,0 +1,112 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'Maven 3.8.6'
+        jdk 'jdk17'
+    }
+
+    environment {
+        JAVA_HOME = tool name: 'jdk17', type: 'jdk'
+        PATH = "${JAVA_HOME}/bin:${PATH}"
+        IMAGE_NAME = 'dod-swim-backend'
+        IMAGE_TAG = 'latest'
+        IMAGE_TAR = 'dod-swim-backend.tar'
+        REMOTE_USER = 'ashis'
+        REMOTE_HOST = '34.30.188.160'
+        REMOTE_IMAGE_PATH = '/home/ashis/dod-swim-backend.tar'
+        CONTAINER_NAME = 'dod-swim-backend'
+        PORT = '8072'
+    }
+
+    stages {
+
+        stage('Verify JDK') {
+            steps {
+                sh 'java -version'
+            }
+        }
+
+        stage('Checkout Code') {
+            steps {
+                git credentialsId: 'ashish-key-git', url: 'https://github.com/data-on-disk/dod-swim-backend.git', branch: 'develop'
+            }
+        }
+
+        stage('Build Application') {
+            steps {
+                sh 'mvn clean package -DskipTests'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    try {
+                        echo "Building Docker image..."
+                        sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
+                    } catch (Exception e) {
+                        error "Docker build failed: ${e.getMessage()}"
+                    }
+                }
+            }
+        }
+
+        stage('Save Docker Image to Tar') {
+            steps {
+                script {
+                    try {
+                        echo "Saving Docker image to tar file..."
+                        sh 'docker save -o $IMAGE_TAR $IMAGE_NAME:$IMAGE_TAG'
+                    } catch (Exception e) {
+                        error "Docker save failed: ${e.getMessage()}"
+                    }
+                }
+            }
+        }
+
+        stage('Deploy Docker Image to VM') {
+            steps {
+                sshagent(credentials: ['vm-key']) {
+                    script {
+                        try {
+                            echo "Copying Docker image tar to VM..."
+                            sh """
+                                scp -v -o StrictHostKeyChecking=no $IMAGE_TAR $REMOTE_USER@$REMOTE_HOST:$REMOTE_IMAGE_PATH
+                            """
+
+                            echo "Loading Docker image and running container on VM..."
+                            sh """
+                                ssh -v -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST '
+                                    docker load -i $REMOTE_IMAGE_PATH &&
+
+                                    if [ \$(docker ps -a -q -f name=$CONTAINER_NAME) ]; then
+                                        docker stop $CONTAINER_NAME &&
+                                        docker rm $CONTAINER_NAME;
+                                    fi &&
+
+                                    docker run -d --name $CONTAINER_NAME -p $PORT:8080 $IMAGE_NAME:$IMAGE_TAG
+                                '
+                            """
+                        } catch (Exception e) {
+                            error "Deployment to VM failed: ${e.getMessage()}"
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
+    post {
+        always {
+            echo 'Pipeline finished.'
+        }
+        success {
+            echo 'Docker deployment successful!'
+        }
+        failure {
+            echo 'Pipeline failed.'
+        }
+    }
+}
