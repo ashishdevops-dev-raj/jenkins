@@ -1,0 +1,80 @@
+Jenkins Pipeline with Shared Library
+---------------------------------
+
+Jenkinsfile Example
+
+
+@Library('shared') _
+
+pipeline {
+    agent any
+
+    environment {
+        PROJECT_NAME = 'MyProject'
+        EMAIL_SENDER = 'ashishrajdevops@gmail.com'
+        EMAIL_RECIPIENTS = 'ashishrajdevops@gmail.com'
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                echo "Building..."
+                // Add your actual build steps here
+            }
+        }
+    }
+
+    post {
+        always {
+            sendBuildNotification(
+                projectName: env.PROJECT_NAME,
+                emailSender: env.EMAIL_SENDER,
+                emailRecipients: env.EMAIL_RECIPIENTS
+            )
+        }
+    }
+}
+
+
+
+
+Step-by-Step: Configure Jenkins Shared Library
+-------------------------------
+
+
+1. Open Jenkins Dashboard
+Navigate to: Manage Jenkins → Configure System
+
+2. Locate: Global Pipeline Libraries
+Scroll to the Global Pipeline Libraries section.
+
+3. Add a New Library
+Click Add and fill in the following details:
+
+Name: shared
+(This must match the library name in the Jenkinsfile: @Library('shared') _)
+
+Default version:
+(e.g., main, master, or a specific branch name in your Git repository)
+
+Retrieval method: Modern SCM
+
+Source Code Management: Git
+
+Git Configuration
+Project Repository:
+Provide the Git URL to your shared library repository
+e.g.: https://github.com/org/shared-libraries.git
+
+Credentials: (Optional)
+Add Git credentials if access is restricted.
+
+Load Implicitly: (Optional)
+Check this box if you want the library to be loaded automatically without needing the @Library(...) declaration in each Jenkinsfile.
+
+
+
+
+
+
+
